@@ -1,85 +1,92 @@
-# Requirements:
-#
-
-
-# from collections import Counter
+from termcolor import colored
 import random
 
-word_list = ["neptune", "pistachios", "orangutan"]
-
-# secret_word = random.choice(word_list)
-secret_word = "apple"
-secret_list = list(secret_word)
-
-# creates blank phrase to be replaced with correct guesses
-def masked_word():
-    hidden_word = "-" * len(secret_list)
-    return hidden_word
-
-# counts the number of each letter in the secret word
-# def count_letters():
-#     counted = {}
-#     counted = Counter(secret_word)
-#     return counted
-
-# gets user input
-def user_input(prompt):
-    user_input = input(prompt)
-    return user_input
-
-# gets index of all occurrences of guessed letter
-def check_word(letter, copy_secret_word):
-    current_letter = copy_secret_word.rfind(letter)
-    index_list = []
-    while current_letter != -1:
-        index_list.append(current_letter)
-        copy_secret_word = copy_secret_word[:current_letter]
-        current_letter = copy_secret_word.rfind(letter)
-    return index_list
-
-# replaces all occurrences of correctly guessed letter in secret word
-replaced_word = ""
-def replace(check_word, masked_word, letter_choice):
-    for x in check_word:
-        word_h = '%s%s%s'%(masked_word[:x], letter_choice, masked_word[x+1:])
+print(colored("***Let's play a game of Spaceman!***", "magenta", attrs=["bold"]) + colored("\nI have a secret word and you guess the letters it contains!", "cyan") + colored("\nIf you guess all the letters, then you win!", "yellow") + colored("\nBut if you guess seven wrong letters then you lose!", "red", attrs=["bold"]))
+# hide secret_word by replacing length of string with dashes
+def mask_word(list_to_mask):
+    masked_word = list("-" * len(list_to_mask))
     return masked_word
 
-# checks guessed letter and allows player to proceed
-def letter_choice(game_choice):
-    if game_choice.isalpha() == True & len(game_choice) == 1:
-        check_word(game_choice, secret_list)
-        return False
+def user_input(masked_list, remaining_lives):
+    # prompt player to guess word
+    print("Here is the secret word: ", masked_list)
+    print("And here are your remaining lives: ", remaining_lives)
+    letter_guess = input(colored("Please guess a letter: ", "green", attrs=["bold"]))
+    return letter_guess
+
+def start_game():
+### if player has guessed seven times, loss condition
+### if player has revealed all letters in secret word, win condition
+# import a list of words
+# get a word from word bank
+    words = open("words.txt", "r")
+    secret_select = words.read().split(" ")
+    secret_word = random.choice(secret_select)
+    print(secret_word)
+
+    secret_list = list(secret_word)
+    masked_list = mask_word(secret_list)
+    remaining_lives = ["√", "√", "√", "√", "√", "√", "√"]
+
+    guessed_seven = False
+    guessed_word = False
+    while guessed_seven == False and guessed_word == False:
+        letter_guess = user_input(masked_list, remaining_lives)
+
+        result = check_if_guess_is_correct(letter_guess, secret_list, masked_list)
+        # if guess is incorrect
+        if result is None:
+            remaining_lives.pop(0)
+
+        if remaining_lives == []:
+            guessed_seven = True
+        else:
+            pass
+
+        if masked_list == secret_list:
+            guessed_word = True
+        else:
+            pass
+        #end while loop
+
+    #check if the game is a win or loss; length == 0
+    if guessed_seven == True:
+        print("Sorry! You lose! The secret word was \"{}\".".format(secret_word))
     else:
-        print("Please do not enter a number or a punctation mark. Please choose one letter at a time. Try again: ")
-        return True
+        print("Congratulations! You win!")
+        # you won
 
-# checks if game has been won or lost
-def game_not_won(letter, word):
-    # Game still ongoing
-    if replaced_word.find("-") != -1:
-        unguessed_word = masked_word()
-        user_letter = letter_choice(letter)
-        word_index = check_word(user_letter, word)
-        replace(word_index, unguessed_word, user_letter)
-    # Win condition
-    elif replaced_word.find("-") >= 0:
-        print("Congratulations! You're down to earth!")
-    # Loss condition
+def check_if_guess_is_correct(guessed_letter, secret_list, masked_list):
+    '''check if the given guessed letter is in the given secret list.
+    If so, update the given masked list with the guessed letterself and return the new list.
+    If the guess is not in the secret list, return None'''
+    # if the guess is correct
+    # if letter_guess in secret_list:
+    did_replace_letter = False
+    for (i, letter) in enumerate(secret_list):
+        # check if guessed_letter is equal to letter
+        if guessed_letter == letter:
+        ## if so,
+            ### replace the element in the masked_list at the i'th index with the guessed_letter
+            masked_list[i] = guessed_letter
+            ### set did_replace_letter = true
+            did_replace_letter = True
+        else:
+            ## else, do nothing. continue for loop
+            pass
+
+    # check if did_replace_letter is true
+    if did_replace_letter == True:
+    ## if so, return the updated masked_list
+        return masked_list
     else:
-        print("Ground control to Major Tom! Time for blast off!")
+    ## else, return None
+        return None
 
-# prompts player to guess a letter
-letter_unchosen = True
-while letter_unchosen:
-    print(masked_word())
-    choose_letter = user_input("Please select a letter: ")
-    word = "word"
-    letter_unchosen = game_not_won(choose_letter, word)
+start_game()
 
-# test function
 def test():
-    print(count_letters())
-    print(masked_word())
-    print(replace([2, 1], "-----", "p"))
-    print(list(secret_word))
+    print(secret_select)
+    print(secret_word)
+
 # test()
