@@ -94,7 +94,6 @@ def check_if_guess_is_correct(guessed_letter, secret_list, masked_list):
             did_replace_letter = True
         else:
             pass
-
     if did_replace_letter == True:
         return masked_list
     else:
